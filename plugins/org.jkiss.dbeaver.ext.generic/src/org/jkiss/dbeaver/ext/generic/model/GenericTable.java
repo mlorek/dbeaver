@@ -40,6 +40,7 @@ import java.util.Map;
 public class GenericTable extends GenericTableBase implements DBPScriptObjectExt2, DBSEntityConstrainable {
 
     private String ddl;
+    private Map<String, Object> lastDdlOptions = null;
 
     public GenericTable(
         GenericStructContainer container,
@@ -73,8 +74,9 @@ public class GenericTable extends GenericTableBase implements DBPScriptObjectExt
     @Override
     @Property(hidden = true, editable = true, updatable = true, order = -1)
     public String getObjectDefinitionText(@NotNull DBRProgressMonitor monitor, @NotNull Map<String, Object> options) throws DBException {
-        if (CommonUtils.getOption(options, DBPScriptObject.OPTION_REFRESH)) {
+        if (CommonUtils.getOption(options, DBPScriptObject.OPTION_REFRESH) || !options.equals(lastDdlOptions)) {
             ddl = null;
+            lastDdlOptions = options;
         }
         if (!isPersisted()) {
             return DBStructUtils.generateTableDDL(monitor, this, options, false);
